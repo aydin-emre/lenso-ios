@@ -1,0 +1,10 @@
+//
+//  InfoPlist.strings
+//  Lenso
+//
+//  Created by Emre on 13.09.2025.
+//
+
+"NSCameraUsageDescription" = "We need your permission to take photos with the camera.";
+"NSPhotoLibraryUsageDescription" = "Photos access is required to select and edit your pictures.";
+"NSPhotoLibraryAddUsageDescription" = "Permission is required to save edited photos to your library.";

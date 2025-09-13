@@ -1,0 +1,23 @@
+//
+//  Localizable.strings
+//  Lenso
+//
+//  Created by Emre on 13.09.2025.
+//
+
+"permission.alert.title" = "İzin Gerekli";
+"permission.alert.cancel" = "İptal";
+"permission.alert.settings" = "Ayarlar";
+
+"permission.camera.message" = "Kamera izni gerekli. Lütfen Ayarlar'dan izin verin.";
+"permission.photos.readwrite.message" = "Fotoğraflarınızı seçmek ve düzenlemek için izne ihtiyaç var. Lütfen Ayarlar'dan izin verin.";
+"permission.photos.addonly.message" = "Düzenlenen fotoğrafları kaydetmek için izin gerekli. Lütfen Ayarlar'dan izin verin.";
+
+"start_editing" = "Düzenlemeye Başla";
+
+"permission.prompt.message" = "Fotoğraflarınızı seçmek ve düzenlemek için depolama izinlerini kabul edin.";
+"permission.prompt.button" = "Devam et";
+
+"home.camera.title" = "Kamera";
+"home.album.title" = "Albüm";
+

@@ -1,0 +1,23 @@
+//
+//  Localizable.strings
+//  Lenso
+//
+//  Created by Emre on 13.09.2025.
+//
+
+"permission.alert.title" = "Permission Required";
+"permission.alert.cancel" = "Cancel";
+"permission.alert.settings" = "Settings";
+
+"permission.camera.message" = "Camera access is required. Please allow in Settings.";
+"permission.photos.readwrite.message" = "Photos access is required to select and edit your pictures. Please allow in Settings.";
+"permission.photos.addonly.message" = "Permission is required to save edited photos to your library. Please allow in Settings.";
+
+"start_editing" = "Start Editing";
+
+"permission.prompt.message" = "Please allow storage permissions to pick and edit your photos.";
+"permission.prompt.button" = "Continue";
+
+"home.camera.title" = "Camera";
+"home.album.title" = "Album";
+

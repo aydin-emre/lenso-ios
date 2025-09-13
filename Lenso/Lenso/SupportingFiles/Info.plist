@@ -21,5 +21,11 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Kamera ile fotoğraf çekmek için izninize ihtiyacımız var.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Düzenlenen fotoğrafları Fotoğraflar'a kaydetmek için izin gerekir.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Fotoğraflarınızı seçmek ve düzenlemek için Fotoğraflar erişimi gerekir.</string>
 </dict>
 </plist>

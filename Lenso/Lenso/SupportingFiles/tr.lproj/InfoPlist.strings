@@ -1,0 +1,10 @@
+//
+//  InfoPlist.strings
+//  Lenso
+//
+//  Created by Emre on 13.09.2025.
+//
+
+"NSCameraUsageDescription" = "Kamera ile fotoğraf çekmek için izninize ihtiyacımız var.";
+"NSPhotoLibraryUsageDescription" = "Fotoğraflarınızı seçmek ve düzenlemek için Fotoğraflar erişimi gerekir.";
+"NSPhotoLibraryAddUsageDescription" = "Düzenlenen fotoğrafları Fotoğraflar'a kaydetmek için izin gerekir.";
