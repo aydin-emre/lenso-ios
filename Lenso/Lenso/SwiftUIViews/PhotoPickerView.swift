@@ -42,7 +42,6 @@ private struct TileButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
             )
-            // Dual shadows for visibility on dark backgrounds: a deeper soft shadow and a subtle top highlight
             .shadow(color: Color.black.opacity(0.55), radius: 20, x: 0, y: 14)
             .shadow(color: Color.white.opacity(0.08), radius: 2, x: 0, y: 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
@@ -50,8 +49,7 @@ private struct TileButtonStyle: ButtonStyle {
     }
 
     private var tileBackgroundColor: Color {
-        // Always-dark background
-        Color(red: 0.12, green: 0.12, blue: 0.12) // ~#1F1F1F
+        Color(red: 0.12, green: 0.12, blue: 0.12)
     }
 }
 

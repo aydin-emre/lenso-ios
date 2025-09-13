@@ -18,9 +18,6 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var requestPermissionView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     
-//    @IBOutlet weak var mainImageView: UIImageView!
-//    @IBOutlet weak var overlayCollectionView: UICollectionView!
-    
     // MARK: - Photos Grid
     private var photoAssets: [PHAsset] = []
     private let imageManager = PHCachingImageManager()
@@ -32,9 +29,6 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         configureContent()
         setupCollectionView()
-//        setupUI()
-//        setupCollectionView()
-//        fetchOverlays()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -141,7 +135,6 @@ extension HomeViewController {
     }
 
     private func setupCollectionView() {
-        collectionView.backgroundColor = .clear
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(PhotoGridCell.self, forCellWithReuseIdentifier: PhotoGridCell.reuseIdentifier)
@@ -157,6 +150,13 @@ extension HomeViewController {
             layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
             collectionView.contentInset = .zero
         }
+    }
+
+    private func openEditor(with image: UIImage) {
+        let viewController = PhotoEditingViewController.instantiate()
+        let viewModel = PhotoEditingViewModel(initialImage: image)
+        viewController.viewModel = viewModel
+        Router.presentViewController(viewController)
     }
 }
 
@@ -182,6 +182,21 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         let itemWidth = floor((width - totalSpacing) / columns)
         return CGSize(width: itemWidth, height: itemWidth)
     }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let asset = photoAssets[indexPath.item]
+        let options = PHImageRequestOptions()
+        options.isSynchronous = false
+        options.deliveryMode = .highQualityFormat
+        options.isNetworkAccessAllowed = true
+
+        let targetSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+        imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { [weak self] image, _ in
+            guard let self = self, let image = image else { return }
+            self.selectedImage = image
+            self.openEditor(with: image)
+        }
+    }
 }
 
 // MARK: - UIImagePickerControllerDelegate
@@ -191,7 +206,10 @@ extension HomeViewController: UIImagePickerControllerDelegate, UINavigationContr
         if let image = info[.originalImage] as? UIImage {
             self.selectedImage = image
         }
-        picker.dismiss(animated: true)
+        picker.dismiss(animated: true) {
+            guard let image = self.selectedImage else { return }
+            self.openEditor(with: image)
+        }
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

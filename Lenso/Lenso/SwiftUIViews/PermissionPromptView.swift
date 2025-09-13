@@ -14,7 +14,6 @@ struct PermissionPromptView: View {
 
     var body: some View {
         ZStack {
-            // Dark overlay that covers the entire container
             Color.black.opacity(0.6)
                 .ignoresSafeArea()
 

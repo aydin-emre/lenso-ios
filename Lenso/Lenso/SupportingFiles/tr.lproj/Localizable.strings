@@ -21,3 +21,7 @@
 "home.camera.title" = "Kamera";
 "home.album.title" = "Albüm";
 
+"overlay.none" = "Yok";
+"error.title" = "Hata";
+"error.no_image" = "Lütfen önce bir görsel seçin.";
+

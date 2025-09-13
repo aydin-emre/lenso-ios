@@ -21,3 +21,7 @@
 "home.camera.title" = "Camera";
 "home.album.title" = "Album";
 
+"overlay.none" = "None";
+"error.title" = "Error";
+"error.no_image" = "Please select an image first.";
+
