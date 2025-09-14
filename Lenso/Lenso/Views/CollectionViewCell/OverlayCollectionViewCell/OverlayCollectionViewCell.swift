@@ -20,8 +20,6 @@ final class OverlayCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        backgroundContainerView.layer.cornerRadius = 8
-        backgroundContainerView.layer.masksToBounds = true
         thumbnailImageView.contentMode = .scaleAspectFit
         thumbnailImageView.clipsToBounds = true
 

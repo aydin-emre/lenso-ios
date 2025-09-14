@@ -25,3 +25,10 @@
 "error.title" = "Hata";
 "error.no_image" = "Lütfen önce bir görsel seçin.";
 
+"show_histogram" = "Histogramı Göster";
+
+"save.success.title" = "Başarılı";
+"save.success.cache" = "Önbelleğe Kaydedildi: %@";
+"save.error.title" = "Kaydetme Hatası";
+"save.error.encode" = "Görsel JPEG veya PNG olarak kodlanamadı.";
+

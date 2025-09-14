@@ -13,6 +13,8 @@
             <connections>
                 <outlet property="contentView" destination="iN0-l3-epB" id="uQI-Lb-OoQ"/>
                 <outlet property="imageView" destination="Vtt-HF-D7F" id="FQL-hA-b3Y"/>
+                <outlet property="showHistogramContainerView" destination="CJs-9F-gtU" id="TPr-90-Wne"/>
+                <outlet property="showHistogramSwitch" destination="Zg3-Ra-6Pn" id="M6V-kE-uNp"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
@@ -23,11 +25,47 @@
                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Vtt-HF-D7F">
                     <rect key="frame" x="0.0" y="0.0" width="320" height="450"/>
                 </imageView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CJs-9F-gtU">
+                    <rect key="frame" x="125.5" y="403" width="194.5" height="39"/>
+                    <subviews>
+                        <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="KC3-4q-MkR">
+                            <rect key="frame" x="8" y="4" width="178.5" height="31"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Show Histogram" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2VS-XN-8MB">
+                                    <rect key="frame" x="0.0" y="0.0" width="125.5" height="31"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <nil key="highlightedColor"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="localizedKey" value="show_histogram"/>
+                                    </userDefinedRuntimeAttributes>
+                                </label>
+                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zg3-Ra-6Pn">
+                                    <rect key="frame" x="129.5" y="0.0" width="51" height="31"/>
+                                </switch>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                    <color key="backgroundColor" white="0.33000000000000002" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="KC3-4q-MkR" firstAttribute="top" secondItem="CJs-9F-gtU" secondAttribute="top" constant="4" id="DBT-gt-ytg"/>
+                        <constraint firstAttribute="bottom" secondItem="KC3-4q-MkR" secondAttribute="bottom" constant="4" id="Ltg-81-eZJ"/>
+                        <constraint firstAttribute="trailing" secondItem="KC3-4q-MkR" secondAttribute="trailing" constant="8" id="TSN-Te-cXk"/>
+                        <constraint firstItem="KC3-4q-MkR" firstAttribute="leading" secondItem="CJs-9F-gtU" secondAttribute="leading" constant="8" id="rcX-CK-zH7"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                            <real key="value" value="8"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                </view>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
             <constraints>
                 <constraint firstItem="Vtt-HF-D7F" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="2Ta-1b-Ba2"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="CJs-9F-gtU" secondAttribute="bottom" constant="8" id="6Yb-Ac-MVf"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="CJs-9F-gtU" secondAttribute="trailing" id="PfK-bE-6wu"/>
                 <constraint firstItem="Vtt-HF-D7F" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="PpX-tA-qts"/>
                 <constraint firstItem="Vtt-HF-D7F" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="iqb-6s-0hp"/>
                 <constraint firstItem="Vtt-HF-D7F" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" id="wZ7-lr-lRQ"/>

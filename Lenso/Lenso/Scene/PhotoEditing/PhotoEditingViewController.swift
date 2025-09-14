@@ -17,13 +17,12 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
     // MARK: - Data
     var viewModel: PhotoEditingViewModel!
     private var selectedOverlayIndex: Int = 0
+    private let cacheFilenamePrefix = "lenso_edited_"
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        setupCollectionView()
         viewModel.delegate = self
-        imageEditingView.setBaseImage(viewModel.selectedImage)
         fetchOverlays()
     }
 
@@ -31,6 +30,7 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
     private func setupUI() {
         setupNavigationButtons()
         setupCollectionView()
+        setupImageEditingView()
     }
 
     private func setupNavigationButtons() {
@@ -69,6 +69,11 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
     }
 
+    private func setupImageEditingView() {
+        imageEditingView.setBaseImage(viewModel.selectedImage)
+        imageEditingView.showHistogram = true
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
@@ -89,19 +94,97 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
         }
     }
 
-    private func saveComposedImage() {
+    private func saveComposedImageToCache() {
         guard let finalImage = imageEditingView.composedImage() else {
             showAlert(title: "error.title".localized, message: "error.no_image".localized)
             return
         }
-        UIImageWriteToSavedPhotosAlbum(finalImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+
+        let cachesDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let jpegURL = cachesDir.appendingPathComponent("\(cacheFilenamePrefix)\(timestamp).jpg")
+
+        if let data = finalImage.jpegData(compressionQuality: 0.9) {
+            do {
+                try data.write(to: jpegURL, options: .atomic)
+                showAlert(title: "save.success.title".localized, message: "save.success.cache".localized(with: jpegURL.lastPathComponent))
+                DispatchQueue.global(qos: .background).async { [weak self] in
+                    self?.cleanupCachedImages()
+                }
+                return
+            } catch {
+                // Fall through to PNG attempt
+            }
+        }
+
+        let pngURL = cachesDir.appendingPathComponent("\(cacheFilenamePrefix)\(timestamp).png")
+        if let data = finalImage.pngData() {
+            do {
+                try data.write(to: pngURL, options: .atomic)
+                showAlert(title: "save.success.title".localized, message: "save.success.cache".localized(with: pngURL.lastPathComponent))
+                DispatchQueue.global(qos: .background).async { [weak self] in
+                    self?.cleanupCachedImages()
+                }
+                return
+            } catch {
+                showAlert(title: "save.error.title".localized, message: error.localizedDescription)
+                return
+            }
+        }
+
+        showAlert(title: "save.error.title".localized, message: "save.error.encode".localized)
     }
 
-    @objc private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        if let error = error {
-            showAlert(title: "Save Error", message: error.localizedDescription)
-        } else {
-            showAlert(title: "Success", message: "Image saved to Photos!")
+    // MARK: - Cache Cleanup
+    private func cleanupCachedImages(maxAgeDays: Int = 7, maxTotalBytes: Int64 = 100 * 1024 * 1024) {
+        let fm = FileManager.default
+        guard let cachesDir = fm.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+        let keys: Set<URLResourceKey> = [.contentModificationDateKey, .creationDateKey, .fileSizeKey]
+        guard let urls = try? fm.contentsOfDirectory(at: cachesDir, includingPropertiesForKeys: Array(keys), options: [.skipsHiddenFiles]) else { return }
+
+        func isEditedImage(_ url: URL) -> Bool {
+            let name = url.lastPathComponent
+            let ext = url.pathExtension.lowercased()
+            return name.hasPrefix(cacheFilenamePrefix) && (ext == "jpg" || ext == "jpeg" || ext == "png")
+        }
+
+        var files = urls.filter { isEditedImage($0) }
+
+        // Delete by age
+        let expiration = Date().addingTimeInterval(-Double(maxAgeDays) * 24 * 60 * 60)
+        for url in files {
+            let values = try? url.resourceValues(forKeys: keys)
+            let date = values?.contentModificationDate ?? values?.creationDate ?? Date.distantPast
+            if date < expiration {
+                try? fm.removeItem(at: url)
+            }
+        }
+
+        // Recalculate remaining files and total size
+        files = (try? fm.contentsOfDirectory(at: cachesDir, includingPropertiesForKeys: Array(keys), options: [.skipsHiddenFiles]))?.filter { isEditedImage($0) } ?? []
+        var sizes: [URL: Int64] = [:]
+        var total: Int64 = 0
+        for url in files {
+            let size = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+            sizes[url] = size
+            total += size
+        }
+
+        if total > maxTotalBytes {
+            // Delete oldest first until under limit
+            let sorted = files.sorted { a, b in
+                let va = try? a.resourceValues(forKeys: [.contentModificationDateKey, .creationDateKey])
+                let vb = try? b.resourceValues(forKeys: [.contentModificationDateKey, .creationDateKey])
+                let da = va?.contentModificationDate ?? va?.creationDate ?? Date.distantPast
+                let db = vb?.contentModificationDate ?? vb?.creationDate ?? Date.distantPast
+                return da < db
+            }
+            for url in sorted {
+                if total <= maxTotalBytes { break }
+                let size = sizes[url] ?? 0
+                try? fm.removeItem(at: url)
+                total -= size
+            }
         }
     }
 
@@ -120,7 +203,7 @@ extension PhotoEditingViewController {
     }
 
     @objc func saveButtonTapped(_ sender: Any) {
-        saveComposedImage()
+        saveComposedImageToCache()
     }
 }
 
@@ -165,6 +248,7 @@ extension PhotoEditingViewController: UICollectionViewDataSource, UICollectionVi
 
 // MARK: - PhotoEditingViewModelDelegate
 extension PhotoEditingViewController: PhotoEditingViewModelDelegate {
+
     func viewModelDidUpdateImage(_ image: UIImage?) {
         imageEditingView.setBaseImage(image)
     }
@@ -178,6 +262,7 @@ extension PhotoEditingViewController: PhotoEditingViewModelDelegate {
     }
 }
 
+// MARK: - StoryboardInstantiable
 extension PhotoEditingViewController: StoryboardInstantiable {
 
     static var storyboard = Storyboard.PhotoEditing

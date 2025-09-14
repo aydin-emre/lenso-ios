@@ -25,3 +25,10 @@
 "error.title" = "Error";
 "error.no_image" = "Please select an image first.";
 
+"show_histogram" = "Show Histogram";
+
+"save.success.title" = "Success";
+"save.success.cache" = "Saved to Cache: %@";
+"save.error.title" = "Save Error";
+"save.error.encode" = "Unable to encode image as JPEG or PNG.";
+
