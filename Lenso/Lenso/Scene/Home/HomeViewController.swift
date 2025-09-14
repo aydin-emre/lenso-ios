@@ -17,25 +17,41 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var libraryPickerView: UIView!
     @IBOutlet weak var requestPermissionView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
-    
+
     // MARK: - Photos Grid
     private var photoAssets: [PHAsset] = []
     private let imageManager = PHCachingImageManager()
     private var selectedImage: UIImage?
-    
-    
+
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         configureContent()
         setupCollectionView()
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updatePermissionUI()
     }
-    
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            let spacing: CGFloat = 3
+            let columns: CGFloat = 3
+            let adjustedWidth = collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right
+            let totalSpacing = spacing * (columns - 1)
+            let itemWidth = floor((adjustedWidth - totalSpacing) / columns)
+            let newSize = CGSize(width: itemWidth, height: itemWidth)
+            if layout.itemSize != newSize {
+                layout.itemSize = newSize
+                layout.invalidateLayout()
+            }
+        }
+    }
+
     private func updatePermissionUI() {
         let status = PermissionsManager.shared.currentStatus(of: .photoLibraryReadWrite)
         switch status {
@@ -143,10 +159,12 @@ extension HomeViewController {
             let spacing: CGFloat = 3
             layout.minimumInteritemSpacing = spacing
             layout.minimumLineSpacing = spacing
+            layout.sectionInset = .zero
+            layout.estimatedItemSize = .zero
             let columns: CGFloat = 3
-            let width = collectionView.bounds.width
+            let adjustedWidth = collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right
             let totalSpacing = spacing * (columns - 1)
-            let itemWidth = floor((width - totalSpacing) / columns)
+            let itemWidth = floor((adjustedWidth - totalSpacing) / columns)
             layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
             collectionView.contentInset = .zero
         }
@@ -166,21 +184,33 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return photoAssets.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoGridCell.reuseIdentifier, for: indexPath) as! PhotoGridCell
         let asset = photoAssets[indexPath.item]
         cell.configure(with: asset, imageManager: imageManager)
         return cell
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let spacing: CGFloat = 3
         let columns: CGFloat = 3
+        let adjustedWidth = collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right
         let totalSpacing = spacing * (columns - 1)
-        let width = collectionView.bounds.width
-        let itemWidth = floor((width - totalSpacing) / columns)
+        let itemWidth = floor((adjustedWidth - totalSpacing) / columns)
         return CGSize(width: itemWidth, height: itemWidth)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return .zero
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 3
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 3
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -211,7 +241,7 @@ extension HomeViewController: UIImagePickerControllerDelegate, UINavigationContr
             self.openEditor(with: image)
         }
     }
-    
+
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
     }
