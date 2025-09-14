@@ -7,7 +7,7 @@
 
 import UIKit
 
-class Router: NSObject {
+final class Router: NSObject {
 
     static func pushViewController(_ viewController: UIViewController, animated: Bool = true) {
         presentedViewController.navigationController?.pushViewController(viewController, animated: animated)

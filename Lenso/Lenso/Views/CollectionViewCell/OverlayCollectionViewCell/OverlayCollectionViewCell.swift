@@ -64,12 +64,13 @@ final class OverlayCollectionViewCell: UICollectionViewCell {
     }
 
     private func loadImage(from url: URL) {
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let data = data, let image = UIImage(data: data) else { return }
-            DispatchQueue.main.async {
-                self?.thumbnailImageView.image = image
+        Task { [weak self] in
+            if let image = try? await DiskImageCache.shared.image(for: url) {
+                await MainActor.run {
+                    self?.thumbnailImageView.image = image
+                }
             }
-        }.resume()
+        }
     }
 
     private func updateSelectionState(_ selected: Bool) {

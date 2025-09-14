@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OverlayModel: Decodable {
+public struct OverlayModel: Codable {
     public let overlayId: Int
     public let overlayName: String
     public let overlayPreviewIconUrl: String

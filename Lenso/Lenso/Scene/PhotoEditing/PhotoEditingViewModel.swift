@@ -37,6 +37,12 @@ final class PhotoEditingViewModel {
     }
 
     func fetchOverlays() {
+        // First deliver cached overlays if any
+        let cached = OverlayStore.shared.load()
+        if !cached.isEmpty {
+            self.overlays = cached
+        }
+
         let request = GetOverlaysRequest()
         apiDataProvider.request(for: request) { [weak self] result in
             DispatchQueue.main.async { [weak self] in
@@ -44,8 +50,11 @@ final class PhotoEditingViewModel {
                 switch result {
                 case .success(let response):
                     self.overlays = response.overlays
+                    OverlayStore.shared.save(response.overlays)
                 case .failure(let error):
-                    self.delegate?.viewModelDidFail(with: "Failed to load overlays. Please try again. (\(error.localizedDescription))")
+                    if cached.isEmpty {
+                        self.delegate?.viewModelDidFail(with: "Failed to load overlays. Please try again. (\(error.localizedDescription))")
+                    }
                 }
             }
         }

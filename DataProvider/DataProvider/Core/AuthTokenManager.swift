@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class AuthTokenManager {
+public final class AuthTokenManager {
     public static var token: String? {
         get {
             return UserDefaults.standard.string(forKey: "auth_token")

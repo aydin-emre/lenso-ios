@@ -87,8 +87,20 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
 
     // MARK: - Image Handling
     private func applyOverlay(_ overlay: OverlayModel) {
-        let url = URL(string: overlay.overlayUrl)
-        imageEditingView.loadOverlay(from: url)
+        if let url = URL(string: overlay.overlayUrl) {
+            Task { [weak self] in
+                guard let self else { return }
+                if let image = try? await DefaultOverlayImageClient.shared.fetchImage(at: url) {
+                    await MainActor.run {
+                        self.imageEditingView.setOverlayImage(image)
+                    }
+                } else {
+                    await MainActor.run {
+                        self.imageEditingView.clearOverlay()
+                    }
+                }
+            }
+        }
         if let index = viewModel.overlays.firstIndex(where: { $0.overlayId == overlay.overlayId }) {
             viewModel.selectOverlay(at: index)
         }
