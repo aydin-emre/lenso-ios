@@ -40,26 +40,27 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XAL-2d-0oN">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="l6M-0Y-JD1" customClass="ImageEditingView" customModule="Lenso" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="118" width="393" height="566"/>
-                            </imageView>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="Pct-gf-BcC" firstAttribute="top" secondItem="XAL-2d-0oN" secondAttribute="bottom" id="0Xq-TY-NqQ"/>
                             <constraint firstItem="Pct-gf-BcC" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="44C-Dd-gIR"/>
-                            <constraint firstItem="XAL-2d-0oN" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="Ny4-0P-N9T"/>
-                            <constraint firstItem="XAL-2d-0oN" firstAttribute="trailing" secondItem="vDu-zF-Fre" secondAttribute="trailing" id="U7w-6e-0IM"/>
+                            <constraint firstItem="l6M-0Y-JD1" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="IXv-8D-oj4"/>
+                            <constraint firstItem="Pct-gf-BcC" firstAttribute="top" secondItem="l6M-0Y-JD1" secondAttribute="bottom" id="U8K-Cb-8Hu"/>
+                            <constraint firstItem="l6M-0Y-JD1" firstAttribute="trailing" secondItem="vDu-zF-Fre" secondAttribute="trailing" id="bEz-XO-L7F"/>
                             <constraint firstItem="Pct-gf-BcC" firstAttribute="trailing" secondItem="vDu-zF-Fre" secondAttribute="trailing" id="fuO-ja-rXw"/>
-                            <constraint firstItem="XAL-2d-0oN" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="kBa-2T-efA"/>
+                            <constraint firstItem="l6M-0Y-JD1" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="mN4-tt-Kkv"/>
                             <constraint firstItem="Pct-gf-BcC" firstAttribute="bottom" secondItem="vDu-zF-Fre" secondAttribute="bottom" id="vPx-8k-ih9"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="6r4-sS-cnP"/>
                     <connections>
                         <outlet property="collectionView" destination="Pct-gf-BcC" id="Q9g-JG-RGz"/>
-                        <outlet property="mainImageView" destination="XAL-2d-0oN" id="NdG-Nf-PSq"/>
+                        <outlet property="imageEditingView" destination="l6M-0Y-JD1" id="k6z-ec-WDq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

@@ -10,12 +10,12 @@ import DataProvider
 
 class PhotoEditingViewController: UIViewController, UIImagePickerControllerDelegate {
 
-    @IBOutlet weak var mainImageView: UIImageView!
+    // MARK: - IBOutlets
+    @IBOutlet weak var imageEditingView: ImageEditingView!
     @IBOutlet weak var collectionView: UICollectionView!
 
     // MARK: - Data
     var viewModel: PhotoEditingViewModel!
-    private var overlayImageView: UIImageView?
     private var selectedOverlayIndex: Int = 0
 
     override func viewDidLoad() {
@@ -23,17 +23,12 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
         setupUI()
         setupCollectionView()
         viewModel.delegate = self
-        self.mainImageView.image = viewModel.selectedImage
+        imageEditingView.setBaseImage(viewModel.selectedImage)
         fetchOverlays()
     }
 
     // MARK: - Setup
     private func setupUI() {
-        mainImageView.contentMode = .scaleAspectFit
-        mainImageView.clipsToBounds = true
-        mainImageView.backgroundColor = .black
-        mainImageView.isUserInteractionEnabled = true
-
         setupNavigationButtons()
         setupCollectionView()
     }
@@ -86,53 +81,20 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
     }
 
     // MARK: - Image Handling
-    private func applyOverlay(_ overlay: OverlayModel, to image: UIImage) {
-        overlayImageView?.removeFromSuperview()
-
-        let overlayView = UIImageView()
-        overlayView.contentMode = .scaleAspectFit
-        overlayView.translatesAutoresizingMaskIntoConstraints = false
-
-        mainImageView.addSubview(overlayView)
-        NSLayoutConstraint.activate([
-            overlayView.centerXAnchor.constraint(equalTo: mainImageView.centerXAnchor),
-            overlayView.centerYAnchor.constraint(equalTo: mainImageView.centerYAnchor),
-            overlayView.widthAnchor.constraint(equalTo: mainImageView.widthAnchor, multiplier: 0.6),
-            overlayView.heightAnchor.constraint(equalTo: mainImageView.heightAnchor, multiplier: 0.6)
-        ])
-
-        if let url = URL(string: overlay.overlayUrl) {
-            URLSession.shared.dataTask(with: url) { data, response, error in
-                guard let data = data, let overlayImage = UIImage(data: data) else { return }
-
-                DispatchQueue.main.async {
-                    overlayView.image = overlayImage
-                }
-            }.resume()
-        }
-
-        overlayImageView = overlayView
+    private func applyOverlay(_ overlay: OverlayModel) {
+        let url = URL(string: overlay.overlayUrl)
+        imageEditingView.loadOverlay(from: url)
         if let index = viewModel.overlays.firstIndex(where: { $0.overlayId == overlay.overlayId }) {
             viewModel.selectOverlay(at: index)
         }
     }
 
-    private func saveImageWithOverlay(_ image: UIImage) {
-        UIGraphicsBeginImageContextWithOptions(mainImageView.bounds.size, false, 0.0)
-
-        image.draw(in: mainImageView.bounds)
-
-        if let overlayImage = overlayImageView?.image {
-            let overlayFrame = overlayImageView?.frame ?? CGRect.zero
-            overlayImage.draw(in: overlayFrame)
+    private func saveComposedImage() {
+        guard let finalImage = imageEditingView.composedImage() else {
+            showAlert(title: "error.title".localized, message: "error.no_image".localized)
+            return
         }
-
-        let combinedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        if let finalImage = combinedImage {
-            UIImageWriteToSavedPhotosAlbum(finalImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
-        }
+        UIImageWriteToSavedPhotosAlbum(finalImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
     }
 
     @objc private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
@@ -158,11 +120,7 @@ extension PhotoEditingViewController {
     }
 
     @objc func saveButtonTapped(_ sender: Any) {
-        guard let image = viewModel.selectedImage else {
-            showAlert(title: "error.title".localized, message: "error.no_image".localized)
-            return
-        }
-        saveImageWithOverlay(image)
+        saveComposedImage()
     }
 }
 
@@ -197,10 +155,9 @@ extension PhotoEditingViewController: UICollectionViewDataSource, UICollectionVi
         selectedOverlayIndex = indexPath.item
         viewModel.selectOverlay(at: indexPath.item)
         if indexPath.item == 0 {
-            overlayImageView?.removeFromSuperview()
-            overlayImageView = nil
-        } else if let base = viewModel.selectedImage, let overlay = viewModel.overlay(at: indexPath.item) {
-            applyOverlay(overlay, to: base)
+            imageEditingView.clearOverlay()
+        } else if let overlay = viewModel.overlay(at: indexPath.item) {
+            applyOverlay(overlay)
         }
         collectionView.reloadData()
     }
@@ -209,7 +166,7 @@ extension PhotoEditingViewController: UICollectionViewDataSource, UICollectionVi
 // MARK: - PhotoEditingViewModelDelegate
 extension PhotoEditingViewController: PhotoEditingViewModelDelegate {
     func viewModelDidUpdateImage(_ image: UIImage?) {
-        self.mainImageView.image = image
+        imageEditingView.setBaseImage(image)
     }
 
     func viewModelDidUpdateOverlays() {

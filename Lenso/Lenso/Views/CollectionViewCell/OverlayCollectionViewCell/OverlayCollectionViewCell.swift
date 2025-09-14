@@ -10,6 +10,7 @@ import DataProvider
 
 final class OverlayCollectionViewCell: UICollectionViewCell {
 
+    // MARK: - IBOutlets
     @IBOutlet weak var thumbnailImageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var backgroundContainerView: UIView!
