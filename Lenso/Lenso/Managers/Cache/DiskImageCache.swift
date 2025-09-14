@@ -16,6 +16,7 @@ final class DiskImageCache {
 	private let ioQueue = DispatchQueue(label: "com.lenso.diskImageCache")
 	private let fileManager = FileManager.default
 	private let cacheDirectory: URL
+	private let memoryCache = NSCache<NSString, UIImage>()
 
 	private init() {
 		let caches = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
@@ -25,9 +26,14 @@ final class DiskImageCache {
 
 	func image(for url: URL) async throws -> UIImage {
 		let path = fileURL(for: url)
+		let memKey = path.lastPathComponent as NSString
+		if let cached = memoryCache.object(forKey: memKey) {
+			return cached
+		}
 		if fileManager.fileExists(atPath: path.path),
 		   let data = try? Data(contentsOf: path),
 		   let image = UIImage(data: data) {
+			memoryCache.setObject(image, forKey: memKey)
 			return image
 		}
 
@@ -38,6 +44,7 @@ final class DiskImageCache {
 			ioQueue.async {
 				try? bytes.write(to: fileURL, options: .atomic)
 			}
+			memoryCache.setObject(image, forKey: memKey)
 			return image
 		}
 		throw NSError(domain: "DiskImageCache", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid image data"])

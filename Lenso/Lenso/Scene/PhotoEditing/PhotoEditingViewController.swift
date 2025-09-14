@@ -8,7 +8,7 @@
 import UIKit
 import DataProvider
 
-class PhotoEditingViewController: UIViewController, UIImagePickerControllerDelegate {
+class PhotoEditingViewController: UIViewController {
 
     // MARK: - IBOutlets
     @IBOutlet weak var imageEditingView: ImageEditingView!
@@ -115,15 +115,15 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
         let cachesDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         let timestamp = Int(Date().timeIntervalSince1970)
         let jpegURL = cachesDir.appendingPathComponent("\(cacheFilenamePrefix)\(timestamp).jpg")
+        var savedURL: URL?
 
         if let data = finalImage.jpegData(compressionQuality: 0.9) {
             do {
                 try data.write(to: jpegURL, options: .atomic)
-                showAlert(title: "save.success.title".localized, message: "save.success.cache".localized(with: jpegURL.lastPathComponent))
+                savedURL = jpegURL
                 DispatchQueue.global(qos: .background).async { [weak self] in
                     self?.cleanupCachedImages()
                 }
-                return
             } catch {
                 // Fall through to PNG attempt
             }
@@ -133,18 +133,21 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
         if let data = finalImage.pngData() {
             do {
                 try data.write(to: pngURL, options: .atomic)
-                showAlert(title: "save.success.title".localized, message: "save.success.cache".localized(with: pngURL.lastPathComponent))
+                savedURL = pngURL
                 DispatchQueue.global(qos: .background).async { [weak self] in
                     self?.cleanupCachedImages()
                 }
-                return
             } catch {
                 showAlert(title: "save.error.title".localized, message: error.localizedDescription)
                 return
             }
         }
 
-        showAlert(title: "save.error.title".localized, message: "save.error.encode".localized)
+        if let savedURL {
+            presentShareSheet(for: savedURL)
+        } else {
+            showAlert(title: "save.error.title".localized, message: "save.error.encode".localized)
+        }
     }
 
     // MARK: - Cache Cleanup
@@ -205,6 +208,16 @@ class PhotoEditingViewController: UIViewController, UIImagePickerControllerDeleg
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
+
+    private func presentShareSheet(for url: URL) {
+        let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        activityVC.excludedActivityTypes = [.assignToContact, .addToReadingList, .openInIBooks]
+        if let pop = activityVC.popoverPresentationController {
+            pop.barButtonItem = navigationItem.rightBarButtonItem
+            pop.sourceView = self.view
+        }
+        present(activityVC, animated: true)
+    }
 }
 
 // MARK: - Actions
@@ -247,6 +260,7 @@ extension PhotoEditingViewController: UICollectionViewDataSource, UICollectionVi
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let previousIndex = selectedOverlayIndex
         selectedOverlayIndex = indexPath.item
         viewModel.selectOverlay(at: indexPath.item)
         if indexPath.item == 0 {
@@ -254,7 +268,11 @@ extension PhotoEditingViewController: UICollectionViewDataSource, UICollectionVi
         } else if let overlay = viewModel.overlay(at: indexPath.item) {
             applyOverlay(overlay)
         }
-        collectionView.reloadData()
+        var toReload: [IndexPath] = [IndexPath(item: selectedOverlayIndex, section: 0)]
+        if previousIndex != selectedOverlayIndex {
+            toReload.append(IndexPath(item: previousIndex, section: 0))
+        }
+        collectionView.reloadItems(at: toReload)
     }
 }
 
